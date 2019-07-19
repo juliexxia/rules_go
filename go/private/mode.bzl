@@ -77,6 +77,7 @@ def _ternary(*values):
         fail("Invalid value {}".format(v))
     fail("_ternary failed to produce a final result from {}".format(values))
 
+# in addition to setting --platforms, can set os and arch on the target
 # get_mode(ctx of current, host_only of go_library, toolchain of current, context_data of go_library)  
 def get_mode(ctx, host_only, go_toolchain, go_context_data):
     aspect_cross_compile = False

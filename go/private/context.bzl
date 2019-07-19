@@ -348,6 +348,14 @@ def _infer_importpath(ctx):
         importpath = importpath[1:]
     return importpath, importpath, INFERRED_PATH
 
+# could use same toolchain (currently do not, diff toolchain for each platform)
+# toolchain is a proxy for the --platforms flag
+#    user gives platform flag and rule can figure out what os and arch
+#    toolchain also helps you build for different execution platforms
+# os and arch (environemnt variables) outside of bazel
+# os and arch inside of bazel -> set --platform to appropriate label and it sets os and arch
+#    bunch of values for --platform for all os and arch combinations
+
 # ctx = ctx of current target being looked at
 # attr = attr of target to which the original aspect was attached
 def go_context(ctx, attr = None):
@@ -374,7 +382,9 @@ def go_context(ctx, attr = None):
     host_only = getattr(attr, "_hostonly", False)                       # read _hostonly attr of go_library
 
     context_data = attr._go_context_data[_GoContextData]                # read _go_context_data attr of go_library
-    # get_mode(ctx of current, host_only of go_library, toolchain of current, context_data of go_library)         
+    # get_mode(ctx of current, host_only of go_library, toolchain of current, context_data of go_library)  
+
+    # #### host_only and context_data consistent       
     mode = get_mode(ctx, host_only, toolchain, context_data)
     # get tags from _go_context_data attr of go_library
     tags = list(context_data.tags)                      

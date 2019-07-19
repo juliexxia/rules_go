@@ -44,6 +44,7 @@ load(
     "GOOS",
 )
 
+# if mode is different aka if os and arch
 def _go_archive_aspect_impl(target, ctx):
     go = go_context(ctx, ctx.rule.attr)
 
@@ -57,11 +58,18 @@ def _go_archive_aspect_impl(target, ctx):
         return []
 
     # We have a library and we need to compile it in a new mode
+    # #### GoLibrary is basically just name of library (step 1)
     library = target[GoLibrary]
+
     # do that with go from go_context, attrs of go_library, library from current target, something from current target
+    # redo step 2
     source = go.library_to_source(go, ctx.rule.attr, library, ctx.coverage_instrumented())
+    
+    # redo step 3
     if archive:
         archive = go.archive(go, source = source)
+    
+    # any rule that cares check these first. 
     return [GoAspectProviders(
         source = source,
         archive = archive,
@@ -71,9 +79,9 @@ go_archive_aspect = aspect(
     _go_archive_aspect_impl,
     attr_aspects = [
         "deps",
-        "embed",
-        "compiler",
-        "compilers",
+        "embed", # how to take sources from multiple libraries -> combined into one library
+        "compiler", # don't worry about
+        "compilers", # don't worry about
         "_stdlib",
         "_coverdata",
     ],

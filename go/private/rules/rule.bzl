@@ -32,11 +32,13 @@ def go_rule(implementation, attrs = None, toolchains = None, bootstrap = False, 
     attrs["_go_context_data"] = attr.label(default = "@io_bazel_rules_go//:go_context_data")
     aspects = []
 
-    # If all the aspect attributes are present, also trigger the aspect on the stdlib attribute
+    # If all the aspect attributes are present, also trigger the aspect on the stdlib attribute (go_test and go_binary)
     if all([k in attrs for k in _ASPECT_ATTRS]):
         aspects.append(go_archive_aspect)
+    # check toolchain
     toolchains = toolchains + ["@io_bazel_rules_go//go:toolchain"]
 
+    # potential future transition work
     if "_nogo" in bootstrap_attrs:
         attrs["_nogo"] = attr.label(default = Label("@io_bazel_rules_nogo//:nogo"), cfg = "host")
     if "_coverdata" in bootstrap_attrs:

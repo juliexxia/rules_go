@@ -32,6 +32,8 @@ load(
     "go_rule",
 )
 
+#blah 
+
 def _go_library_impl(ctx):
     """Implements the go_library() rule."""
     go = go_context(ctx)
