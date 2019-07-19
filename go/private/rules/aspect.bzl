@@ -58,6 +58,7 @@ def _go_archive_aspect_impl(target, ctx):
 
     # We have a library and we need to compile it in a new mode
     library = target[GoLibrary]
+    # do that with go from go_context, attrs of go_library, library from current target, something from current target
     source = go.library_to_source(go, ctx.rule.attr, library, ctx.coverage_instrumented())
     if archive:
         archive = go.archive(go, source = source)

@@ -215,6 +215,7 @@ def _dedup_deps(deps):
         deduped_deps.append(dep)
     return deduped_deps
 
+# go_context, attrs of go_library, library from current target, something from current target
 def _library_to_source(go, attr, library, coverage_instrumented):
     #TODO: stop collapsing a depset in this line...
     attr_srcs = [f for t in getattr(attr, "srcs", []) for f in as_iterable(t.files)]
@@ -347,35 +348,45 @@ def _infer_importpath(ctx):
         importpath = importpath[1:]
     return importpath, importpath, INFERRED_PATH
 
+# ctx = ctx of current target being looked at
+# attr = attr of target to which the original aspect was attached
 def go_context(ctx, attr = None):
+    # get go toolchain of current target                                # read toolchain of current target
     toolchain = ctx.toolchains["@io_bazel_rules_go//go:toolchain"]
 
+    # if attr of go_library is null, use attr of current target (?)
     if not attr:
         attr = ctx.attr
 
     nogo = None
+    # if current target has "_nogo" attr,                               # read _nogo attr of go_library
     if hasattr(attr, "_nogo"):
         nogo_files = attr._nogo.files.to_list()
+        # if nogo_files is not empty, nogo = first in list of files
         if nogo_files:
             nogo = nogo_files[0]
 
-    coverdata = getattr(attr, "_coverdata", None)
+    coverdata = getattr(attr, "_coverdata", None)                       # read _coverdata attr of go_library
+    # get_archive(coverdata attr of go_library)
     if coverdata:
         coverdata = get_archive(coverdata)
 
-    host_only = getattr(attr, "_hostonly", False)
+    host_only = getattr(attr, "_hostonly", False)                       # read _hostonly attr of go_library
 
-    context_data = attr._go_context_data[_GoContextData]
+    context_data = attr._go_context_data[_GoContextData]                # read _go_context_data attr of go_library
+    # get_mode(ctx of current, host_only of go_library, toolchain of current, context_data of go_library)         
     mode = get_mode(ctx, host_only, toolchain, context_data)
-    tags = list(context_data.tags)
+    # get tags from _go_context_data attr of go_library
+    tags = list(context_data.tags)                      
     if mode.race:
         tags.append("race")
     if mode.msan:
         tags.append("msan")
     binary = toolchain.sdk.go
 
-    stdlib = getattr(attr, "_stdlib", None)
+    stdlib = getattr(attr, "_stdlib", None)                             # read _stdlib attr of go_library
     if stdlib:
+        # get_source(_stdlib attr of go_library)
         stdlib = get_source(stdlib).stdlib
         goroot = stdlib.root_file.dirname
     else:
@@ -398,9 +409,11 @@ def go_context(ctx, attr = None):
                  toolchain.sdk.libs +
                  toolchain.sdk.tools)
 
+    # _check_importpaths(current target ctx)
     _check_importpaths(ctx)
+    # _check_importpaths(current target ctx)                            # read attrs and label of current target
     importpath, importmap, pathtype = _infer_importpath(ctx)
-    importpath_aliases = tuple(getattr(attr, "importpath_aliases", ()))
+    importpath_aliases = tuple(getattr(attr, "importpath_aliases", ())) # read importpath_aliases of go_library
 
     return GoContext(
         # Fields

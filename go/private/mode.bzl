@@ -77,15 +77,16 @@ def _ternary(*values):
         fail("Invalid value {}".format(v))
     fail("_ternary failed to produce a final result from {}".format(values))
 
+# get_mode(ctx of current, host_only of go_library, toolchain of current, context_data of go_library)  
 def get_mode(ctx, host_only, go_toolchain, go_context_data):
     aspect_cross_compile = False
-    goos = go_toolchain.default_goos
-    attr_goos = getattr(ctx.attr, "goos", "auto")
+    goos = go_toolchain.default_goos                                                # get goos from toolchain of current 
+    attr_goos = getattr(ctx.attr, "goos", "auto")                                   # get good from ctx of current
     if goos != attr_goos and attr_goos != "auto":
         goos = attr_goos
         aspect_cross_compile = True
-    goarch = go_toolchain.default_goarch
-    attr_goarch = getattr(ctx.attr, "goarch", "auto")
+    goarch = go_toolchain.default_goarch                                            # get goarch from toolchain of current
+    attr_goarch = getattr(ctx.attr, "goarch", "auto")                               # get goarch from ctx of current
     if goarch != attr_goarch and attr_goarch != "auto":
         goarch = attr_goarch
         aspect_cross_compile = True
@@ -104,7 +105,7 @@ def get_mode(ctx, host_only, go_toolchain, go_context_data):
         force_pure = "off"
 
     static = _ternary(
-        getattr(ctx.attr, "static", None),
+        getattr(ctx.attr, "static", None),          # sets a bunch of stuff via ctx. of current 
         "static" in ctx.features,
     )
     race = _ternary(
